@@ -49,6 +49,13 @@ class AppService {
   }
     return this.edamamInstance.post('/assistant/v1/query', JSON.stringify(data))
   }
+
+  requestMealPlan(requestToMealPlanAPI) {
+    const { uri, body } = requestToMealPlanAPI
+    console.log({ uri })
+    console.log({ body })
+    return this.edamamInstance.post(uri, JSON.stringify(body))
+  }
 }
 
 module.exports = AppService
