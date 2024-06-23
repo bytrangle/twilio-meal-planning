@@ -1,7 +1,5 @@
 const express = require('express')
 const bodyParser = require('body-parser')
-const cookieParser = require('coo')
-// const { MessagingResponse } = require('twilio').twiml
 const MessagingResponse = require('twilio/lib/twiml/MessagingResponse')
 const fs = require('fs')
 const path = require('path')
@@ -13,7 +11,6 @@ const { USER_STATS_FILE } = constants
 
 const app = express()
 app.use(bodyParser.urlencoded({ extended: false }));
-app.use(express.cookieParser())
 
 app.get('/', (req, res) => {
   // return appService.getHello(...args)
@@ -21,7 +18,6 @@ app.get('/', (req, res) => {
 })
 
 app.post('/', (req, res) => {
-  console.log(req.cookies)
   const { Body, From, ProfileName } = req.body
   const today = dateToISO(new Date())
   // let userStats = {}
