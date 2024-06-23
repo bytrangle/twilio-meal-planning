@@ -5,7 +5,7 @@ const MessagingResponse = require('twilio/lib/twiml/MessagingResponse')
 const fs = require('fs')
 const path = require('path')
 const AppService = require('./AppService')
-const { dateToISO } = require('./utils')
+const { dateToISO, createHtmlEmail } = require('./utils')
 const constants = require('./constants')
 const appService = new AppService()
 const { USER_STATS_FILE } = constants
@@ -133,11 +133,12 @@ app.post('/', (req, res) => {
       if (!respFromRecipeAPI.hits || !respFromRecipeAPI.hits.length) {
         throw new Error('Failed to retrieve recipes. Please contact chatbot author for help')
       }
+      const htmlEmail = createHtmlEmail(respFromRecipeAPI, ProfileName, mealPlanRequest)
       const emailMessage = {
         to: email,
         from: 'lethutrang101@gmail.com',
         subject: `Your ${mealPlanSize}-day meal plan`,
-        html: `<p>Hi ${ProfileName}. You request "${mealPlanRequest}". Here's your menu:</p>`
+        html: htmlEmail
       }
       return sgMail.send(emailMessage)
       // twiml.message(message)
