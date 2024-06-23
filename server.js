@@ -1,5 +1,6 @@
 const express = require('express')
 const bodyParser = require('body-parser')
+const sgMail = require('@sendgrid/mail')
 const MessagingResponse = require('twilio/lib/twiml/MessagingResponse')
 const fs = require('fs')
 const path = require('path')
@@ -12,6 +13,8 @@ const { USER_STATS_FILE } = constants
 const app = express()
 app.use(bodyParser.urlencoded({ extended: false }));
 
+sgMail.setApiKey(process.env.SENDGRID_API_KEY)
+
 app.get('/', (req, res) => {
   // return appService.getHello(...args)
   res.type('text/html').send('This is a server for processing your meal plan request')
@@ -19,12 +22,14 @@ app.get('/', (req, res) => {
 
 app.post('/', (req, res) => {
   const { Body, From, ProfileName } = req.body
+  console.log(Body)
   // Remove the email address
-  const splitBody = Body.split(/\s*<.+>/)
+  const splitBody = Body.split(/\s*</)
   if (splitBody.length < 2) {
     throw new Error('You should include your email address in valid syntax')
   }
-  const [mealPlanRequest, email] = splitBody
+  const mealPlanRequest = splitBody[0]
+  const email = splitBody[1].replace(/>$/, '')
   console.log({ email })
   const today = dateToISO(new Date())
   // let userStats = {}
@@ -123,17 +128,29 @@ app.post('/', (req, res) => {
       return appService.getRecipesByURI(uriList)
     })
     .then((resp) => {
-      console.log(resp)
       const respFromRecipeAPI = resp.data
-      let message = 'Your meal plan has been created'
+      console.log(respFromRecipeAPI)
       if (!respFromRecipeAPI.hits || !respFromRecipeAPI.hits.length) {
-        message = 'Failed to retrieve recipes. Please contact chatbot author for help'
+        throw new Error('Failed to retrieve recipes. Please contact chatbot author for help')
       }
+      const emailMessage = {
+        to: email,
+        from: 'lethutrang101@gmail.com',
+        subject: `Your ${mealPlanSize}-day meal plan`,
+        html: `<p>Hi ${ProfileName}. You request "${mealPlanRequest}". Here's your menu:</p>`
+      }
+      return sgMail.send(emailMessage)
+      // twiml.message(message)
+      // res.type('text/xml').send(twiml.toString())
+    })
+    .then(resp => {
+      console.log(resp)
+      const message = '🥳 Success! I\'ve sent a big-flavor meal plan to your given email address'
       twiml.message(message)
       res.type('text/xml').send(twiml.toString())
     })
     .catch((error) => {
-      console.log(error)
+      console.error(error)
       twiml.message(error)
       res.type('text/xml').send(twiml.toString())
     })
