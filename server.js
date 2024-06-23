@@ -19,6 +19,13 @@ app.get('/', (req, res) => {
 
 app.post('/', (req, res) => {
   const { Body, From, ProfileName } = req.body
+  // Remove the email address
+  const splitBody = Body.split(/\s*<.+>/)
+  if (splitBody.length < 2) {
+    throw new Error('You should include your email address in valid syntax')
+  }
+  const [mealPlanRequest, email] = splitBody
+  console.log({ email })
   const today = dateToISO(new Date())
   // let userStats = {}
   // if (fs.existsSync(USER_STATS_FILE)) {
@@ -58,7 +65,7 @@ app.post('/', (req, res) => {
     let mealPlan = []
     let mealPlanSize = 1
     const twiml = new MessagingResponse()
-    appService.constructMealPlanRequest(Body)
+    appService.constructMealPlanRequest(mealPlanRequest)
     .then((result) => {
       const chatbotResp = result.data
       if (!chatbotResp.request && !chatbotResp.request.body) {
