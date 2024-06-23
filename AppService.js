@@ -63,7 +63,7 @@ class AppService {
         uri: uriList,
         app_id: process.env.EDAMAM_APP_ID,
         app_key: process.env.EDAMAM_APP_KEY,
-        field: ['label', 'source', 'url', 'mealType']
+        field: ['label', 'source', 'url', 'mealType', 'image']
       },
       paramsSerializer: {
         indexes: null
