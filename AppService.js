@@ -56,6 +56,20 @@ class AppService {
     console.log({ body })
     return this.edamamInstance.post(uri, JSON.stringify(body))
   }
+  getRecipesByURI(uriList) {
+    return this.edamamInstance.get('/recipes/v2/by-uri', {
+      params: {
+        type: 'public',
+        uri: uriList,
+        app_id: process.env.EDAMAM_APP_ID,
+        app_key: process.env.EDAMAM_APP_KEY,
+        field: ['label', 'source', 'url', 'mealType']
+      },
+      paramsSerializer: {
+        indexes: null
+      }
+    })
+  }
 }
 
 module.exports = AppService
